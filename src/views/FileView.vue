@@ -1,15 +1,24 @@
 <script>
 import { RouterLink } from 'vue-router'
 import axios from 'axios'
-import config from '../config.json'
+import BackIcon from '../components/icons/BackIcon.vue'
+import RefreshIcon from '../components/icons/RefreshIcon.vue'
+import FileIcon from '../components/icons/FileIcon.vue'
+import DirectoryIcon from '../components/icons/FileDirectoryIcon.vue'
+import PreviewFile from '../components/PreviewFile.vue'
 
 export default {
   components: {
-    RouterLink
+    RouterLink,
+    BackIcon,
+    RefreshIcon,
+    FileIcon,
+    DirectoryIcon,
+    PreviewFile
   },
   data() {
     return {
-      config: config,
+      config: null,
       path: '',
       isLoading: false,
       isError: false,
@@ -18,12 +27,23 @@ export default {
       list: []
     }
   },
-  mounted() {
-    this.path = this.$route.fullPath
+  async mounted() {
+    if(this.config == null) await this.loadConfig()
+    this.path = this.$route.fullPath.split('%20').join(' ')
     this.init()
     this.listenRouter()
   },
   methods: {
+    async loadConfig(){
+      try{
+        var res = await axios.get('/config.json')
+        if(res.status == 200){
+          this.config = res.data
+        }
+      }catch(e){
+        console.error(e)
+      }
+    },
     init() {
       this.parsePath(this.path)
       this.loadData(this.path)
@@ -51,7 +71,7 @@ export default {
         rlink[0].isLink = false
         rlink.reverse()
         rlink.unshift({
-          name: 'ROOT',
+          name: 'Root',
           link: '/',
           isLink: true
         })
@@ -59,7 +79,7 @@ export default {
       } else {
         this.link = [
           {
-            name: 'ROOT',
+            name: 'Root',
             link: '/',
             isLink: false
           }
@@ -67,11 +87,11 @@ export default {
       }
     },
     async loadData(path) {
-      document.title = this.path + ' - ' + config.site_name
+      document.title = this.path + ' - ' + this.config.site_name
       this.list = []
       try {
         this.isLoading = true
-        var res = await axios.get(config.api + path.substring(1))
+        var res = await axios.get(this.config.api + path.substring(1))
         var resultList = res.data
         var directoryList = {}
         var directorySort = []
@@ -96,6 +116,7 @@ export default {
             name: tmp.name,
             time: this.timeParse(tmp.mtime),
             link: this.path + tmp.name + '/',
+            src: this.config.api + this.path.substring(1) + tmp.name + '/',
             size: '',
             fileType: ''
           })
@@ -106,7 +127,8 @@ export default {
             type: tmp.type,
             name: tmp.name,
             time: this.timeParse(tmp.mtime),
-            link: config.api + this.path.substring(1) + tmp.name,
+            link: this.path + tmp.name,
+            src: this.config.api + this.path.substring(1) + tmp.name,
             size: this.sizeParse(tmp.size),
             fileType: this.fileTypeParse(tmp.name)
           })
@@ -187,26 +209,36 @@ export default {
       return sizeNumber + ' TB'
     },
     fileTypeParse(name) {
-      var suffix = name.split('.').pop()
-      var imageSuffix = ['bmp', 'jpg', 'png', 'jpeg', 'gif', 'exif', 'svg', 'webp', 'avif']
-      var videoSuffix = ['mp4', 'mpeg', 'mov', 'wmv', 'rmvb', 'mkv', 'flv', '3gp', 'webm']
-      var compressSuffix = ['rar', 'zip', '7z', 'tar', 'gz', 'tgz', 'xz']
-      var applicationSuffix = ['exe', 'msi', 'dmg', 'deb', 'rpm', 'flatpak', 'apk', 'ipa']
-      if (imageSuffix.indexOf(suffix) >= 0) {
-        return 'image'
-      } else if (videoSuffix.indexOf(suffix) >= 0) {
-        return 'video'
-      } else if (compressSuffix.indexOf(suffix) >= 0) {
-        return 'compress'
-      } else if (applicationSuffix.indexOf(suffix) >= 0) {
-        return 'application'
+      var suffix = name.split('.').pop().toLowerCase()
+      var typeMap = {
+        image: ['apng','avif','bmp','gif','ico','cur','jpg','jpeg','jfif','pjpeg','pjp','png','webp','svg'],
+        video: ['mp4','3gp','ogg'],
+        voice: ['mp3','ogg','wav'],
+        compress: ['zip','rar','7z','xz','tgz','tar','gz'],
+        excel: ['xls','xlsx'],
+        word: ['doc','docx'],
+        ppt: ['ppt','pptx'],
+        pdf: ['pdf'],
+        text: ['txt']
       }
+      for(let i in typeMap){
+        if(typeMap[i].indexOf(suffix) >= 0){
+          return i
+        }
+      }
+      return 'unknown'
     },
     back() {
       this.$router.back()
     },
     refresh() {
       this.init()
+    },
+    go(link){
+      this.$router.push(link)
+    },
+    preview(file){
+      this.$refs.preview.preview(file)
     }
   }
 }
@@ -216,16 +248,11 @@ export default {
   <div class="content">
     <div class="content-header">
       <div class="back" @click="back">
-        <svg viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M708.383253 957.296943c-6.289728 0-12.576383-2.398963-17.376358-7.19689l-392.936471-392.937495c-25.550034-25.550034-25.550034-67.121826 0-92.671861 0.12389-0.12389 0.249828-0.246756 0.375766-0.367575l407.301582-390.221127c9.799606-9.388005 25.355496-9.056266 34.744525 0.744365s9.056266 25.355496-0.744365 34.744525L332.676724 499.389828c-3.002032 3.076775-4.652535 7.130337-4.652535 11.436799 0 4.375062 1.704769 8.490057 4.798951 11.583215l392.936471 392.936471c9.595853 9.596877 9.595853 25.154815 0 34.751692C720.961684 954.896956 714.670933 957.296943 708.383253 957.296943z"
-            fill="black"
-          ></path>
-        </svg>
+        <BackIcon></BackIcon>
       </div>
       <div class="path">
         <template v-for="(i, k) in link" v-bind:key="k">
-          <div class="path-link" v-if="i.isLink">
+          <div class="path-link" v-bind:class="{ disable: isLoading }" v-if="i.isLink">
             <RouterLink :to="i.link">{{ i.name }}</RouterLink>
           </div>
           <div class="path-name" v-if="!i.isLink">{{ i.name }}</div>
@@ -237,35 +264,32 @@ export default {
         </template>
       </div>
       <div class="refresh" v-bind:class="{ disable: isLoading }" @click="refresh">
-        <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M939.456 256.224c-16.672-5.984-34.976 2.72-40.896 19.36l-24.768 69.344c-28.992-65.312-74.784-122.72-133.088-165.92C555.328 41.728 291.296 79.232 152.32 262.656c-67.264 88.768-95.616 198.176-79.84 308.032 15.84 110.304 74.208 207.776 164.352 274.496 75.424 55.808 163.808 82.752 251.456 82.752 128.032 0 254.56-57.44 336.992-166.272 36.48-48.128 61.472-102.08 74.208-160.416 3.776-17.248-7.136-34.304-24.416-38.08-17.216-3.712-34.304 7.104-38.08 24.416-10.784 49.184-31.872 94.752-62.72 135.456-117.888 155.52-341.92 187.232-499.392 70.72-76.288-56.48-125.664-138.912-139.072-232.16-13.344-92.8 10.656-185.248 67.488-260.288 117.856-155.584 341.792-187.424 499.328-70.848 57.024 42.24 99.84 100.608 122.976 166.624l-109.984-42.944c-16.416-6.368-35.008 1.696-41.44 18.176-6.432 16.48 1.728 35.008 18.176 41.44l161.856 63.2c3.808 1.472 7.744 2.208 11.616 2.208 0.544 0 1.024-0.192 1.568-0.224 1.216 0.128 2.432 0.64 3.648 0.64 13.12 0 25.472-8.16 30.112-21.248l57.632-161.184C964.768 280.48 956.096 262.144 939.456 256.224z"
-            fill="#black"
-          ></path>
-        </svg>
+        <RefreshIcon></RefreshIcon>
       </div>
     </div>
     <div class="list">
       <div class="list-header">
+        <div class="list-header-icon"></div>
         <div class="list-header-name">Name</div>
         <div class="list-header-time">Time</div>
         <div class="list-header-size">Size</div>
       </div>
       <div class="item" v-for="(i, k) in list" v-bind:key="k">
-        <RouterLink class="file-name" v-if="i.type == 'directory'" :to="i.link">{{
-          i.name
-        }}</RouterLink>
-        <a class="file-name" v-if="i.type == 'file'" :href="i.link" target="_blank">{{ i.name }}</a>
+        <div class="file-icon">
+          <DirectoryIcon v-if="i.type == 'directory'"></DirectoryIcon>
+          <FileIcon v-if="i.type == 'file'" :type="i.fileType"></FileIcon>
+        </div>
+        <div class="file-name" @click="i.type == 'directory' ? go(i.link) : preview(i) ">{{ i.name }}</div>
         <div class="file-time">{{ i.time }}</div>
         <div class="file-size">{{ i.size }}</div>
       </div>
       <div class="loading" v-if="isLoading">Loading...</div>
     </div>
   </div>
-  <div class="footer">
-    <a href="https://www.mayushan.com">MaYushan.com</a>
+  <div class="footer" v-if="config != null" v-html="config.footer">
   </div>
   <div class="error-mask" v-if="isError">
     <div class="error">{{ errorMessage }}</div>
   </div>
+  <PreviewFile ref="preview"></PreviewFile>
 </template>

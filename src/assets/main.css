@@ -12,6 +12,10 @@ a:visited {
   color: #000;
 }
 
+svg.icon{
+  display: inline-block;
+}
+
 a:link {
   text-decoration: underline;
   text-decoration-color: black;
@@ -48,9 +52,9 @@ a:hover {
 }
 .back > svg,
 .refresh > svg {
-  width: 24px;
-  height: 24px;
-  padding: 4px;
+  width: 16px;
+  height: 16px;
+  padding: 8px;
 }
 .back:hover,
 .refresh:hover {
@@ -61,16 +65,15 @@ a:hover {
 }
 
 .path {
-  flex-shrink: 0;
   border: solid 1px black;
   padding: 4px;
   margin: 0 4px;
   flex-grow: 1;
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
+  justify-content: flex-end;
   align-items: center;
-  overflow-y: hidden;
+  overflow: hidden;
 }
 
 .path-link,
@@ -82,13 +85,15 @@ a:hover {
   padding: 4px;
   user-select: none;
 }
-
+.path-link.disable{
+  pointer-events: none;
+}
 .path-link > a {
   text-decoration: none;
 }
 
 .path-link:hover {
-  text-decoration: underline;
+  background-color: rgba(0,0,0,0.1);
 }
 
 .path-slash {
@@ -105,6 +110,9 @@ a:hover {
   padding: 0;
   margin: 0;
   display: block;
+}
+.path-slash:nth-last-child(1){
+  flex-grow: 1;
 }
 
 .list {
@@ -125,6 +133,11 @@ a:hover {
   align-items: center;
 }
 
+.list-header-icon,
+.file-icon {
+  width: 16px;
+}
+
 .list-header-name,
 .file-name {
   flex-grow: 1;
@@ -132,7 +145,7 @@ a:hover {
 
 .list-header-time,
 .file-time {
-  width: 240px;
+  width: 180px;
 }
 
 .list-header-size,
@@ -146,6 +159,7 @@ a:hover {
   border-bottom: solid 1px black;
 }
 
+.list-header-icon,
 .list-header-name,
 .list-header-time,
 .list-header-size {
@@ -153,11 +167,18 @@ a:hover {
   font-size: 14px;
   font-weight: bolder;
 }
+.list-header-icon{
+  width: 16px;
+  height: 16px;
+}
+.list-header-name,
 .list-header-time,
 .list-header-size {
   padding-left: 4px;
 }
-
+.file-name{
+  cursor: pointer;
+}
 .file-name,
 .file-time,
 .file-size {
@@ -165,11 +186,12 @@ a:hover {
   font-size: 14px;
 }
 
-.file-name:hover {
-  text-decoration: underline;
+.file-icon{
+  width: 16px;
+  height: 16px;
 }
 
-.file-time {
+.file-name,.file-time {
   text-align: left;
   margin-left: 4px;
 }
@@ -183,6 +205,11 @@ a:hover {
   padding: 4px;
   border: solid 1px rgba(0, 0, 0, 0);
 }
+
+.item:hover{
+  background-color: rgba(0,0,0,0.1);
+}
+
 .item > a {
   text-decoration: none;
 }
