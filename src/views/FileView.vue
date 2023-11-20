@@ -1,11 +1,12 @@
 <script>
-import { RouterLink } from 'vue-router'
-import axios from 'axios'
-import BackIcon from '../components/icons/BackIcon.vue'
-import RefreshIcon from '../components/icons/RefreshIcon.vue'
-import FileIcon from '../components/icons/FileIcon.vue'
-import DirectoryIcon from '../components/icons/FileDirectoryIcon.vue'
-import PreviewFile from '../components/PreviewFile.vue'
+import { RouterLink } from 'vue-router';
+import axios from 'axios';
+import BackIcon from '../components/icons/BackIcon.vue';
+import RefreshIcon from '../components/icons/RefreshIcon.vue';
+import FileIcon from '../components/icons/FileIcon.vue';
+import DirectoryIcon from '../components/icons/FileDirectoryIcon.vue';
+import PreviewFile from '../components/PreviewFile.vue';
+import PreviewImageFile from '../components/PreviewImageFile.vue';
 
 export default {
   components: {
@@ -14,7 +15,8 @@ export default {
     RefreshIcon,
     FileIcon,
     DirectoryIcon,
-    PreviewFile
+    PreviewFile,
+    PreviewImageFile
   },
   data() {
     return {
@@ -137,7 +139,6 @@ export default {
         this.isLoading = false
         this.isError = false
       } catch (e) {
-        //console.error(e)
         if (e.code == 'ERR_NETWORK') {
           this.errorMessage = 'ERR_NETWORK'
         } else if (e.code == 'ERR_BAD_REQUEST') {
@@ -238,7 +239,11 @@ export default {
       this.$router.push(link)
     },
     preview(file){
-      this.$refs.preview.preview(file)
+      if(file.fileType == 'image'){
+        this.$refs.previewImage.preview(file)
+      }else{
+        this.$refs.preview.preview(file)
+      }
     }
   }
 }
@@ -292,4 +297,5 @@ export default {
     <div class="error">{{ errorMessage }}</div>
   </div>
   <PreviewFile ref="preview"></PreviewFile>
+  <PreviewImageFile ref="previewImage"></PreviewImageFile>
 </template>

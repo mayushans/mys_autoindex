@@ -59,7 +59,7 @@ export default {
         </div>
     </div>
 </template>
-<style>
+<style scoped>
 .preview-mask{
     width: 100vw;
     height: 100vh;
