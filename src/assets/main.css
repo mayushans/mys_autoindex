@@ -252,3 +252,9 @@ a:hover {
   font-size: 14px;
   line-height: 16px;
 }
+
+.markdown-view{
+  border: solid 1px black;
+  padding: 4px;
+  margin-top: 4px !important;
+}

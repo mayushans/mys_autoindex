@@ -1,12 +1,14 @@
 <script>
-import { RouterLink } from 'vue-router';
-import axios from 'axios';
-import BackIcon from '../components/icons/BackIcon.vue';
-import RefreshIcon from '../components/icons/RefreshIcon.vue';
-import FileIcon from '../components/icons/FileIcon.vue';
-import DirectoryIcon from '../components/icons/FileDirectoryIcon.vue';
-import PreviewFile from '../components/PreviewFile.vue';
-import PreviewImageFile from '../components/PreviewImageFile.vue';
+import { RouterLink } from 'vue-router'
+import axios from 'axios'
+import BackIcon from '../components/icons/BackIcon.vue'
+import RefreshIcon from '../components/icons/RefreshIcon.vue'
+import FileIcon from '../components/icons/FileIcon.vue'
+import DirectoryIcon from '../components/icons/FileDirectoryIcon.vue'
+import PreviewFile from '../components/PreviewFile.vue'
+import PreviewImageFile from '../components/PreviewImageFile.vue'
+import { marked } from 'marked'
+import 'github-markdown-css/github-markdown.css'
 
 export default {
   components: {
@@ -26,23 +28,25 @@ export default {
       isError: false,
       errorMessage: '',
       link: [],
-      list: []
+      list: [],
+      markdown_visible: false,
+      markdown_html: ''
     }
   },
   async mounted() {
-    if(this.config == null) await this.loadConfig()
+    if (this.config == null) await this.loadConfig()
     this.path = this.$route.fullPath.split('%20').join(' ')
     this.init()
     this.listenRouter()
   },
   methods: {
-    async loadConfig(){
-      try{
+    async loadConfig() {
+      try {
         var res = await axios.get('/config.json')
-        if(res.status == 200){
+        if (res.status == 200) {
           this.config = res.data
         }
-      }catch(e){
+      } catch (e) {
         console.error(e)
       }
     },
@@ -91,6 +95,8 @@ export default {
     async loadData(path) {
       document.title = this.path + ' - ' + this.config.site_name
       this.list = []
+      this.markdown_visible = false
+      this.markdown_html = ''
       try {
         this.isLoading = true
         var res = await axios.get(this.config.api + path.substring(1))
@@ -125,6 +131,9 @@ export default {
         }
         for (let i = 0; i < fileSort.length; i++) {
           let tmp = fileList[fileSort[i]]
+          if (tmp.name == 'README.md') {
+            this.loadMarkdown(this.config.api + this.path.substring(1) + tmp.name)
+          }
           enderList.push({
             type: tmp.type,
             name: tmp.name,
@@ -212,22 +221,47 @@ export default {
     fileTypeParse(name) {
       var suffix = name.split('.').pop().toLowerCase()
       var typeMap = {
-        image: ['apng','avif','bmp','gif','ico','cur','jpg','jpeg','jfif','pjpeg','pjp','png','webp','svg'],
-        video: ['mp4','3gp','ogg'],
-        voice: ['mp3','ogg','wav'],
-        compress: ['zip','rar','7z','xz','tgz','tar','gz'],
-        excel: ['xls','xlsx'],
-        word: ['doc','docx'],
-        ppt: ['ppt','pptx'],
+        image: [
+          'apng',
+          'avif',
+          'bmp',
+          'gif',
+          'ico',
+          'cur',
+          'jpg',
+          'jpeg',
+          'jfif',
+          'pjpeg',
+          'pjp',
+          'png',
+          'webp',
+          'svg'
+        ],
+        video: ['mp4', '3gp', 'ogg'],
+        voice: ['mp3', 'ogg', 'wav'],
+        compress: ['zip', 'rar', '7z', 'xz', 'tgz', 'tar', 'gz'],
+        excel: ['xls', 'xlsx'],
+        word: ['doc', 'docx'],
+        ppt: ['ppt', 'pptx'],
         pdf: ['pdf'],
         text: ['txt']
       }
-      for(let i in typeMap){
-        if(typeMap[i].indexOf(suffix) >= 0){
+      for (let i in typeMap) {
+        if (typeMap[i].indexOf(suffix) >= 0) {
           return i
         }
       }
       return 'unknown'
+    },
+    async loadMarkdown(link) {
+      var md = await axios.get(link)
+      console.log(md.data)
+
+      this.markdown_html = marked.parse(md.data)
+
+      console.log(this.markdown_html)
+
+      this.markdown_visible = true
     },
     back() {
       this.$router.back()
@@ -235,13 +269,13 @@ export default {
     refresh() {
       this.init()
     },
-    go(link){
+    go(link) {
       this.$router.push(link)
     },
-    preview(file){
-      if(file.fileType == 'image'){
+    preview(file) {
+      if (file.fileType == 'image') {
         this.$refs.previewImage.preview(file)
-      }else{
+      } else {
         this.$refs.preview.preview(file)
       }
     }
@@ -284,15 +318,17 @@ export default {
           <DirectoryIcon v-if="i.type == 'directory'"></DirectoryIcon>
           <FileIcon v-if="i.type == 'file'" :type="i.fileType"></FileIcon>
         </div>
-        <div class="file-name" @click="i.type == 'directory' ? go(i.link) : preview(i) ">{{ i.name }}</div>
+        <div class="file-name" @click="i.type == 'directory' ? go(i.link) : preview(i)">
+          {{ i.name }}
+        </div>
         <div class="file-time">{{ i.time }}</div>
         <div class="file-size">{{ i.size }}</div>
       </div>
       <div class="loading" v-if="isLoading">Loading...</div>
     </div>
+    <div class="markdown-view markdown-body" v-if="markdown_visible" v-html="markdown_html"></div>
   </div>
-  <div class="footer" v-if="config != null" v-html="config.footer">
-  </div>
+  <div class="footer" v-if="config != null" v-html="config.footer"></div>
   <div class="error-mask" v-if="isError">
     <div class="error">{{ errorMessage }}</div>
   </div>

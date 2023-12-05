@@ -24,6 +24,7 @@ export default {
             this.visible = false
         },
         download(){
+            this.hide()
             window.open(this.file.src)
         }
     }
@@ -40,12 +41,16 @@ export default {
             </div>
             <div class="preview-info">
                 <div class="preview-info-item">
-                    <div class="pii-label">名称</div>
+                    <div class="pii-label">Name</div>
                     <div class="pii-value">{{ file != null ? file.name : '' }}</div>
                 </div>
                 <div class="preview-info-item">
-                    <div class="pii-label">大小</div>
+                    <div class="pii-label">Size</div>
                     <div class="pii-value">{{ file != null ? file.size : '' }}</div>
+                </div>
+                <div class="preview-info-item">
+                    <div class="pii-label">Update Time</div>
+                    <div class="pii-value">{{ file != null ? file.time : '' }}</div>
                 </div>
             </div>
             <div class="preview-action">
@@ -128,7 +133,7 @@ export default {
     align-items: flex-start;
 }
 .pii-label{
-    width: 60px;
+    width: 120px;
     line-height: 18px;
     font-size: 16px;
     flex-shrink: 0;
