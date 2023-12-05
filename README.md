@@ -1,5 +1,8 @@
 # MYS AUTOINDEX
 Nginx autoindex 的前端，用于美化显示 autoindex 页面。
++ 目录显示
++ 图片预览
++ README.md 文件显示
 
 ## 使用方法
 ### 1.设置 Nginx
@@ -41,9 +44,3 @@ __footer__ 为页面底部显示信息
     "footer": "<a href=\"https://www.mayushan.com\">MaYushan.com</a>"
 }
 ```
-## 开发路线
-| 功能 | 状态 |
-| :- | :-: |
-| 图标显示 | √ |
-| 图片文件预览 | √ |
-| 页面自定义嵌入 Markdown 文件显示 | √ |
