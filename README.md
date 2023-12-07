@@ -1,7 +1,6 @@
 # MYS AUTOINDEX
 Nginx autoindex 的前端，用于美化显示 autoindex 页面。
 + 目录显示
-+ 图片预览
 + README.md 文件显示
 
 ## 使用方法
@@ -36,11 +35,9 @@ npm run build
 修改网站根目录 __config.json__ 文件  
 __site_name__ 为网站标题显示  
 __api__ 为 autoindex 服务的地址，务必以“__/__”结尾  
-__footer__ 为页面底部显示信息
 ```json
 {
     "site_name": "MYS DOWNLOAD",
-    "api": "https://dir.mysun.link:20443/",
-    "footer": "<a href=\"https://www.mayushan.com\">MaYushan.com</a>"
+    "base_url": "/file/",
 }
 ```

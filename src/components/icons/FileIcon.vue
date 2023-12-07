@@ -26,14 +26,14 @@ export default {
 }
 </script>
 <template>
-  <FileUnknownIcon v-if="type == 'unknown'"></FileUnknownIcon>
   <FileImageIcon v-if="type == 'image'"></FileImageIcon>
-  <FileVideoIcon v-if="type == 'video'"></FileVideoIcon>
-  <FileVoiceIcon v-if="type == 'voice'"></FileVoiceIcon>
-  <FileCompressIcon v-if="type == 'compress'"></FileCompressIcon>
-  <FileExcelIcon v-if="type == 'excel'"></FileExcelIcon>
-  <FileWordIcon v-if="type == 'word'"></FileWordIcon>
-  <FilePptIcon v-if="type == 'ppt'"></FilePptIcon>
-  <FilePdfIcon v-if="type == 'pdf'"></FilePdfIcon>
-  <FileTextIcon v-if="type == 'text'"></FileTextIcon>
+  <FileVideoIcon v-else-if="type == 'video'"></FileVideoIcon>
+  <FileVoiceIcon v-else-if="type == 'voice'"></FileVoiceIcon>
+  <FileCompressIcon v-else-if="type == 'compress'"></FileCompressIcon>
+  <FileExcelIcon v-else-if="type == 'excel'"></FileExcelIcon>
+  <FileWordIcon v-else-if="type == 'word'"></FileWordIcon>
+  <FilePptIcon v-else-if="type == 'ppt'"></FilePptIcon>
+  <FilePdfIcon v-else-if="type == 'pdf'"></FilePdfIcon>
+  <FileTextIcon v-else-if="type == 'text'"></FileTextIcon>
+  <FileUnknownIcon v-else></FileUnknownIcon>
 </template>
