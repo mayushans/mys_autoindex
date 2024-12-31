@@ -78,7 +78,14 @@ export default {
     },
     async loadMarkdown(link) {
       var md = await axios.get(link)
-      this.markdown_html = marked.parse(md.data)
+      var mdreplated = md.data
+      if (this.config.markdown_replace != undefined) {
+        var k = Object.keys(this.config.markdown_replace)
+        for (let i = 0; i < k.length; i++) {
+          mdreplated = mdreplated.replace(k[i], this.config.markdown_replace[k[i]])
+        }
+      }
+      this.markdown_html = marked.parse(mdreplated)
       this.markdown_visible = true
     },
     back() {
@@ -92,7 +99,7 @@ export default {
     go(path) {
       this.$router.push(path)
     },
-    open(file){
+    open(file) {
       window.open(file.src)
     }
   }
@@ -102,7 +109,7 @@ export default {
 <template>
   <div class="container">
     <div class="header">
-      <div class="path" v-bind:class="{disable: isLoading}">
+      <div class="path" v-bind:class="{ disable: isLoading }">
         <template v-for="(i, k) in path" v-bind:key="k">
           <div class="path-link">
             <div class="path-root" @click="go(i.link)" v-bind:class="{ link: i.isLink }" v-if="i.link == '/'">
@@ -123,8 +130,10 @@ export default {
       <div class="empty" v-if="isLoading == false && list.length == 0">
         <EmptyIcon></EmptyIcon>
       </div>
-      <div class="markdown-view markdown-body" style="border: none;" v-if="markdown_html != ''" v-html="markdown_html"></div>
-      <div class="file" v-if="listVisible" v-for="(i, k) in list"  v-bind:class="{disable: isLoading}" v-bind:key="k" @click="i.type == 'directory' ? go(i.path) : open(i)">
+      <div class="markdown-view markdown-body" style="border: none;" v-if="markdown_html != ''" v-html="markdown_html">
+      </div>
+      <div class="file" v-if="listVisible" v-for="(i, k) in list" v-bind:class="{ disable: isLoading }" v-bind:key="k"
+        @click="i.type == 'directory' ? go(i.path) : open(i)">
         <div class="icon">
           <DirectoryIcon v-if="i.type == 'directory'"></DirectoryIcon>
           <FileIcon v-if="i.type == 'file'" :type="i.fileType"></FileIcon>
@@ -136,7 +145,7 @@ export default {
             <div class="size">{{ i.size }}</div>
           </div>
         </div>
-        <div class="arrow" v-bind:class="{show: i.type == 'directory'}">
+        <div class="arrow" v-bind:class="{ show: i.type == 'directory' }">
           <RightIcon></RightIcon>
         </div>
       </div>

@@ -1,4 +1,7 @@
 {
     "site_name": "MYS DOWNLOAD",
-    "base_url": "https://dl.mysun.link:20443/"
+    "base_url": "https://dl.mysun.link:20443/",
+    "markdown_replace":{
+        "[PATH]":"https://dl.mysun.link:20443/"
+    }
 }
