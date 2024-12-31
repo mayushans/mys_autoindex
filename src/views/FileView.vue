@@ -25,7 +25,8 @@ export default {
       nfc: null,
       path: [],
       list: [],
-      markdown_html: ''
+      markdown_html: '',
+      listVisible: true
     }
   },
   async mounted() {
@@ -52,7 +53,13 @@ export default {
         this.list = data.fileList
       })
       this.nfc.registerFilter('README.md', (file) => {
+        this.listVisible = false
         this.loadMarkdown(file.src)
+        this.listVisible = true
+      })
+      this.nfc.registerFilter('index.md', (file) => {
+        this.loadMarkdown(file.src)
+        this.listVisible = false
       })
       this.isLoading = true
       await this.nfc.go(decodeURI(this.$route.fullPath.split('%20').join(' ')))
@@ -62,6 +69,8 @@ export default {
       this.$router.beforeEach(async (to, from, next) => {
         await next()
         this.markdown_html = ''
+        this.list = []
+        this.listVisible = true
         this.isLoading = true
         await this.nfc.go(to.fullPath)
         this.isLoading = false
@@ -111,11 +120,11 @@ export default {
       </div>
     </div>
     <div class="content">
-      <div class="empty" v-if="list.length == 0">
+      <div class="empty" v-if="isLoading == false && list.length == 0">
         <EmptyIcon></EmptyIcon>
       </div>
-      <div class="markdown-view markdown-body" v-if="markdown_html != ''" v-html="markdown_html"></div>
-      <div class="file" v-for="(i, k) in list"  v-bind:class="{disable: isLoading}" v-bind:key="k" @click="i.type == 'directory' ? go(i.path) : open(i)">
+      <div class="markdown-view markdown-body" style="border: none;" v-if="markdown_html != ''" v-html="markdown_html"></div>
+      <div class="file" v-if="listVisible" v-for="(i, k) in list"  v-bind:class="{disable: isLoading}" v-bind:key="k" @click="i.type == 'directory' ? go(i.path) : open(i)">
         <div class="icon">
           <DirectoryIcon v-if="i.type == 'directory'"></DirectoryIcon>
           <FileIcon v-if="i.type == 'file'" :type="i.fileType"></FileIcon>

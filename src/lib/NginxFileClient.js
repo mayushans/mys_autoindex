@@ -67,8 +67,8 @@ class NginxFileClient {
           type: tmp.type,
           name: tmp.name,
           time: this.timeFormat(tmp.mtime),
-          path: this.path + tmp.name + '/',
-          src: this.bashUrl + this.path.substring(1) + tmp.name + '/',
+          path: (this.path.substring(this.path.length - 1) == '/' ? this.path : (this.path + '/')) + tmp.name + '',
+          src: this.bashUrl + (this.path.substring(this.path.length - 1) == '/' ? this.path.substring(1) : (this.path.substring(1) + '/')) + tmp.name + '/',
           size: '',
           suffix: '',
           fileType: ''
@@ -82,8 +82,8 @@ class NginxFileClient {
           type: tmp.type,
           name: tmp.name,
           time: this.timeFormat(tmp.mtime),
-          path: this.path + tmp.name,
-          src: this.bashUrl + this.path.substring(1) + tmp.name,
+          path: (this.path.substring(this.path.length - 1) == '/' ? this.path : (this.path + '/')) + tmp.name + '',
+          src: this.bashUrl + (this.path.substring(this.path.length - 1) == '/' ? this.path.substring(1) : (this.path.substring(1) + '/')) + tmp.name,
           size: this.sizeFormat(tmp.size),
           suffix: suffix,
           fileType: this.getFileType(suffix)
@@ -250,12 +250,13 @@ class NginxFileClient {
   async go(path) {
     this.path = path
     if (path != '/') {
-      var pex = path.substring(1, path.length - 1).split('/')
+      var pex = (path.substring(path.length-1) == '/' ? path.substring(1, path.length - 1) : path).split('/')
+      pex.shift()
       var rlink = []
       while (pex.length > 0) {
-        var tl = '/' + pex.join('/') + '/'
+        var tl = '/' + pex.join('/')
         var tn = pex.pop()
-        rlink.push({
+        if(tn != '') rlink.push({
           name: tn,
           link: tl,
           isLink: true
